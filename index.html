@@ -117,6 +117,44 @@
     color: var(--accent);
     background: rgba(94, 235, 160, 0.07);
   }
+  .tag-row{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+  }
+  .tag-group:last-child .tag-row{ margin-bottom: 0; }
+  #tagRow{
+    margin-top: 10px;
+  }
+  .tag-cat{
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+  }
+  .tag-btn{
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .tag-btn:hover{
+    border-color: var(--accent-dim);
+    color: var(--accent);
+  }
+  .tag-btn.active{
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(94, 235, 160, 0.07);
+  }
   .out{
     display:flex;
     gap: 8px;
@@ -186,6 +224,7 @@
     <div class="field">
       <label for="termo">Termo de busca</label>
       <input type="text" id="termo" value="typescript" placeholder="ex: typescript, rust, kubernetes">
+      <div class="tag-row" id="tagRow"></div>
     </div>
 
     <div class="field">
@@ -226,9 +265,55 @@
   const urlBox = document.getElementById('urlBox');
   const copyBtn = document.getElementById('copyBtn');
   const openLink = document.getElementById('openLink');
+  const tagRow = document.getElementById('tagRow');
+
+  const SUGGESTED_TERMS = {
+    'Linguagens': ['typescript', 'javascript', 'python', 'go', 'rust', 'java'],
+    'Frontend': ['react', 'next.js', 'tailwind'],
+    'Backend & APIs': ['node.js', 'rest api', 'graphql', 'microservices'],
+    'Dados & Infra': ['postgresql', 'sql', 'docker', 'kubernetes', 'aws', 'firebase', 'cloudflare', 'devops', 'ci/cd'],
+    'IA': ['claude', 'gemini', 'codex'],
+    'Práticas': ['system design', 'clean code', 'api design', 'testing']
+  };
+
+  function renderTags(){
+    tagRow.innerHTML = '';
+    const current = termoInput.value.trim().toLowerCase();
+    Object.entries(SUGGESTED_TERMS).forEach(([category, terms]) => {
+      const group = document.createElement('div');
+      group.className = 'tag-group';
+
+      const catLabel = document.createElement('div');
+      catLabel.className = 'tag-cat';
+      catLabel.textContent = category;
+      group.appendChild(catLabel);
+
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+
+      terms.forEach(term => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tag-btn';
+        btn.textContent = term;
+        if(current === term){
+          btn.classList.add('active');
+        }
+        btn.addEventListener('click', () => {
+          termoInput.value = term;
+          render();
+        });
+        row.appendChild(btn);
+      });
+
+      group.appendChild(row);
+      tagRow.appendChild(group);
+    });
+  }
 
   function buildUrl(){
-    const termo = termoInput.value.trim() || 'typescript';
+    const termoRaw = termoInput.value.trim() || 'typescript';
+    const termo = termoRaw.includes(' ') ? `"${termoRaw}"` : termoRaw;
     const excludeRaw = excluirInput.value.split(',').map(s => s.trim()).filter(Boolean);
     const excludeParts = excludeRaw.map(term => {
       return term.includes(' ') ? `NOT "${term}"` : `NOT ${term}`;
@@ -248,6 +333,7 @@
     openLink.href = url;
     copyBtn.textContent = 'Copiar';
     copyBtn.classList.remove('copied');
+    renderTags();
   }
 
   termoInput.addEventListener('input', render);
