@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filtro de Posts — LinkedIn</title>
+<style>
+  :root{
+    --bg: #0d1210;
+    --panel: #131a17;
+    --line: #23302a;
+    --text: #d8e4dd;
+    --muted: #7c9089;
+    --accent: #5eeba0;
+    --accent-dim: #2c5c44;
+    --danger: #e07a5f;
+    --mono: "SFMono-Regular", "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  *{ box-sizing: border-box; }
+  html, body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+  }
+  body{
+    display:flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  .wrap{
+    width: 100%;
+    max-width: 620px;
+  }
+  .eyebrow{
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 6px 0;
+  }
+  h1{
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .sub{
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 32px 0;
+    line-height: 1.5;
+  }
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  label{
+    display:block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .field{ margin-bottom: 20px; }
+  .field:last-child{ margin-bottom: 0; }
+  input[type=text]{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  input[type=text]:focus{
+    border-color: var(--accent-dim);
+  }
+  .hint{
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .radio-row{
+    display:flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .radio-row input{ display:none; }
+  .radio-row label.pill{
+    display:inline-flex;
+    align-items:center;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    text-transform:none;
+    letter-spacing: 0;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s ease;
+  }
+  .radio-row input:checked + label.pill{
+    border-color: var(--accent-dim);
+    color: var(--accent);
+    background: rgba(94, 235, 160, 0.07);
+  }
+  .out{
+    display:flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .url-box{
+    flex:1;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    word-break: break-all;
+    line-height: 1.5;
+    max-height: 90px;
+    overflow-y: auto;
+  }
+  .btn-copy{
+    flex-shrink:0;
+    background: var(--accent);
+    color: #0a1210;
+    border: none;
+    border-radius: 4px;
+    padding: 0 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  .btn-copy:hover{ opacity: 0.85; }
+  .btn-copy:active{ transform: translateY(1px); }
+  .btn-copy.copied{ background: var(--accent); }
+  .btn-open{
+    display:inline-block;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-dim);
+    padding-bottom: 1px;
+  }
+  .btn-open:hover{ border-color: var(--accent); }
+  .foot{
+    color: var(--muted);
+    font-size: 11px;
+    text-align:center;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .foot code{
+    background: var(--panel);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">/// search builder</p>
+  <h1>Filtro de posts do LinkedIn</h1>
+  <p class="sub">Monta a URL de busca por posts recentes sobre um tema, já excluindo vagas e recrutamento, pra você achar gente pra interagir — não vaga pra aplicar.</p>
+
+  <div class="panel">
+    <div class="field">
+      <label for="termo">Termo de busca</label>
+      <input type="text" id="termo" value="typescript" placeholder="ex: typescript, rust, kubernetes">
+    </div>
+
+    <div class="field">
+      <label for="excluir">Excluir (separado por vírgula)</label>
+      <input type="text" id="excluir" value="vaga, hiring, estamos contratando">
+      <p class="hint">Cada termo vira um NOT na busca. Frases com espaço são colocadas entre aspas automaticamente.</p>
+    </div>
+
+    <div class="field">
+      <label>Período</label>
+      <div class="radio-row" id="periodo">
+        <input type="radio" name="periodo" id="p24h" value="past-24h" checked>
+        <label class="pill" for="p24h">Últimas 24h</label>
+        <input type="radio" name="periodo" id="psem" value="past-week">
+        <label class="pill" for="psem">Última semana</label>
+        <input type="radio" name="periodo" id="pmes" value="past-month">
+        <label class="pill" for="pmes">Último mês</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <label>URL gerada</label>
+    <div class="out">
+      <div class="url-box" id="urlBox"></div>
+      <button class="btn-copy" id="copyBtn">Copiar</button>
+    </div>
+    <a class="btn-open" id="openLink" href="#" target="_blank" rel="noopener">Abrir no LinkedIn ↗</a>
+  </div>
+
+  <p class="foot">Cole a URL copiada direto na barra de endereço do navegador.<br>Troque o termo e clique em <code>Copiar</code> de novo quando quiser mudar de assunto.</p>
+</div>
+
+<script>
+  const termoInput = document.getElementById('termo');
+  const excluirInput = document.getElementById('excluir');
+  const periodoInputs = document.querySelectorAll('input[name=periodo]');
+  const urlBox = document.getElementById('urlBox');
+  const copyBtn = document.getElementById('copyBtn');
+  const openLink = document.getElementById('openLink');
+
+  function buildUrl(){
+    const termo = termoInput.value.trim() || 'typescript';
+    const excludeRaw = excluirInput.value.split(',').map(s => s.trim()).filter(Boolean);
+    const excludeParts = excludeRaw.map(term => {
+      return term.includes(' ') ? `NOT "${term}"` : `NOT ${term}`;
+    });
+    const keywords = [termo, ...excludeParts].join(' ');
+
+    let periodo = 'past-24h';
+    periodoInputs.forEach(r => { if(r.checked) periodo = r.value; });
+
+    const params = `keywords=${encodeURIComponent(keywords)}&origin=FACETED_SEARCH&datePosted=${encodeURIComponent(JSON.stringify([periodo]))}`;
+    return `https://www.linkedin.com/search/results/content/?${params}`;
+  }
+
+  function render(){
+    const url = buildUrl();
+    urlBox.textContent = url;
+    openLink.href = url;
+    copyBtn.textContent = 'Copiar';
+    copyBtn.classList.remove('copied');
+  }
+
+  termoInput.addEventListener('input', render);
+  excluirInput.addEventListener('input', render);
+  periodoInputs.forEach(r => r.addEventListener('change', render));
+
+  copyBtn.addEventListener('click', async () => {
+    const url = buildUrl();
+    try{
+      await navigator.clipboard.writeText(url);
+    }catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    copyBtn.textContent = 'Copiado ✓';
+    copyBtn.classList.add('copied');
+    setTimeout(() => { copyBtn.textContent = 'Copiar'; copyBtn.classList.remove('copied'); }, 1500);
+  });
+
+  render();
+</script>
+</body>
+</html>
